@@ -4,9 +4,11 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { createCipheriv, createDecipheriv, createHmac, randomBytes, randomUUID, timingSafeEqual } from 'node:crypto';
 import { Ledger } from './ledger.js';
 
+// Abre o banco e garante que o bloco de emissão exista.
 const ledger = new Ledger();
 await ledger.initialize();
 
+// Mantém a assinatura JWT válida entre reinícios.
 const keyPath = ledger.path + '.key';
 try {
   writeFileSync(keyPath, randomBytes(32), { flag: 'wx', mode: 0o600 });
@@ -15,6 +17,7 @@ try {
 }
 const secret = readFileSync(keyPath);
 if (secret.length !== 32) throw new Error('Chave JWT local inválida.');
+// Cifra o saldo bancário fictício antes de armazená-lo em memória.
 const dataKey = randomBytes(32);
 const iv = randomBytes(12);
 const cipher = createCipheriv('aes-256-gcm', dataKey, iv);
@@ -24,13 +27,15 @@ const sessions = new Map();
 const files = new Map([
   ['/', ['index.html', 'text/html; charset=utf-8']],
   ['/banco', ['bank.html', 'text/html; charset=utf-8']],
+  ['/api.js', ['api.js', 'text/javascript; charset=utf-8']],
   ['/app.js', ['app.js', 'text/javascript; charset=utf-8']],
   ['/bank.js', ['bank.js', 'text/javascript; charset=utf-8']],
   ['/styles.css', ['styles.css', 'text/css; charset=utf-8']],
-].map(([url, [name, type]]) => [url, [readFileSync(new URL('./public/' + name, import.meta.url)), type]]));
+].map(([url, [name, type]]) => [url, [readFileSync(new URL('./docs/' + name, import.meta.url)), type]]));
 
 const encode = (value) => Buffer.from(JSON.stringify(value)).toString('base64url');
 const sign = (input) => createHmac('sha256', secret).update(input).digest('base64url');
+// Cria uma identidade fictícia e emite um JWT com validade de uma hora.
 function login() {
   const now = Math.floor(Date.now() / 1000);
   for (const [id, session] of sessions) if (session.exp <= now) sessions.delete(id);
@@ -41,6 +46,7 @@ function login() {
   return input + '.' + sign(input);
 }
 
+// Valida a assinatura e os claims do token antes de identificar a carteira.
 function authenticate(request) {
   const token = request.headers.authorization?.match(/^Bearer ([\w.-]+)$/)?.[1];
   const parts = token?.split('.');
@@ -67,6 +73,7 @@ function reply(response, status, payload) {
   response.end(JSON.stringify(payload));
 }
 
+// Limita o tamanho do corpo e aceita somente objetos JSON.
 async function body(request) {
   if (!request.headers['content-type']?.startsWith('application/json')) throw failure(415, 'Envie JSON.');
   let input = '';
@@ -83,6 +90,7 @@ async function body(request) {
   }
 }
 
+// Bloqueia consultas sem consentimento vigente.
 function activeConsent(session) {
   const consent = session.consent;
   if (!consent || consent.expiresAt <= Date.now() || consent.status === 'REVOGADO') {
@@ -133,6 +141,7 @@ async function handle(request, response) {
         if (consent.status !== 'AUTENTICADO' || data.state !== consent.state || data.code !== consent.code) {
           throw failure(409, 'Confirmação inválida ou já utilizada.');
         }
+        // Descarta os códigos temporários após a confirmação.
         session.consent = { status: 'CONFIRMADO', expiresAt: consent.expiresAt };
         return reply(response, 200, consentView(session.consent));
       }

@@ -1,3 +1,5 @@
+import { api } from './api.js';
+
 const form = document.getElementById('bankForm');
 const feedback = document.getElementById('bankError');
 const pin = document.getElementById('pin');
@@ -7,16 +9,11 @@ form.addEventListener('submit', async (event) => {
   button.disabled = true;
   feedback.hidden = true;
   try {
-    const response = await fetch('/api/bank/authorize', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: 'Bearer ' + (sessionStorage.getItem('drexToken') ?? ''),
-      },
-      body: JSON.stringify({ state: new URLSearchParams(location.search).get('state'), pin: pin.value }),
+    // Valida o PIN fictício e recebe a URL de retorno.
+    const result = await api('bank/authorize', 'POST', {
+      state: new URLSearchParams(location.search).get('state'),
+      pin: pin.value,
     });
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.error);
     location.replace(result.returnUrl);
   } catch (error) {
     feedback.textContent = error.message;

@@ -12,6 +12,7 @@ export class Ledger {
     this.path = resolve(path);
   }
 
+  // Executa o Python sem bloquear o servidor e lê a resposta JSON.
   async #execute(action, args = {}) {
     const { stdout } = await run(process.env.PYTHON || 'python3', [
       script, this.path, action, JSON.stringify(args),
@@ -21,6 +22,7 @@ export class Ledger {
     return result.data;
   }
 
+  // Cria a pasta de dados e prepara o SQLite.
   async initialize() {
     await mkdir(dirname(this.path), { recursive: true });
     await this.#execute('initialize');

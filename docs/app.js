@@ -1,23 +1,14 @@
+import { api, isPages } from './api.js';
+
+// Obtém os campos da interface e formata valores em reais.
 const byId = (id) => document.getElementById(id);
 const money = (cents) => (cents / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+// Lê os parâmetros do retorno bancário e limpa a URL.
 const params = new URLSearchParams(location.search);
 let callback = params.has('state') && params.has('code') ? Object.fromEntries(params) : null;
-if (location.search) history.replaceState(null, '', '/');
+if (location.search) history.replaceState(null, '', location.pathname);
 let account;
-
-async function api(path, method = 'GET', data) {
-  const response = await fetch('/api/' + path, {
-    method,
-    headers: {
-      Authorization: 'Bearer ' + (sessionStorage.getItem('drexToken') ?? ''),
-      ...(data === undefined ? {} : { 'Content-Type': 'application/json' }),
-    },
-    body: data === undefined ? undefined : JSON.stringify(data),
-  });
-  const result = await response.json();
-  if (!response.ok) throw Object.assign(new Error(result.error), { status: response.status });
-  return result;
-}
+if (isPages) byId('environment').textContent = 'Demonstração no navegador';
 
 function notice(message, error = false) {
   byId('feedback').textContent = message;
@@ -25,6 +16,7 @@ function notice(message, error = false) {
   byId('feedback').hidden = !message;
 }
 
+// Atualiza os botões e limpa o saldo compartilhado quando o acesso termina.
 function showConsent() {
   const consent = account.consent;
   const status = consent && consent.status !== 'REVOGADO' && Date.now() >= consent.expiresAt ? 'EXPIRADO' : consent?.status;
@@ -52,6 +44,7 @@ function total() {
   byId('total').textContent = 'Total da compra: ' + money(Number(byId('quantity').value) * account.unitPrice);
 }
 
+// Consulta a carteira e o livro-razão e atualiza a tela.
 async function refresh() {
   let ledger;
   [account, ledger] = await Promise.all([api('account'), api('ledger')]);
@@ -79,6 +72,7 @@ async function refresh() {
   total();
 }
 
+// Desabilita o botão durante a operação e exibe erros.
 function action(element, event, run) {
   element.addEventListener(event, async (e) => {
     e.preventDefault();
@@ -91,6 +85,7 @@ function action(element, event, run) {
   });
 }
 
+// Reutiliza o identificador ao repetir uma tentativa de compra.
 let purchaseAttempt;
 action(byId('purchase'), 'submit', async () => {
   const units = Number(byId('quantity').value);

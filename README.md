@@ -4,7 +4,13 @@ Projeto da disciplina de Tecnologia Bancária do curso de Engenharia da Computa�
 
 **Conceitos aplicados:** DREX como referência para liquidação de ativos digitais, tokenização de um recebível, DLT com réplicas didáticas, Open Finance com consentimento e Sandbox Regulatório como referência para delimitar um ambiente de testes.
 
-## Executar em sala
+## Abrir a demonstração
+
+[Abrir no GitHub Pages](https://eduardopolletini.github.io/projetoDREX/). A versão online simula compra, consentimento e auditoria no navegador. A versão local executa a API Node.js, o domínio Python e o SQLite.
+
+Veja o [guia de arquitetura](ARQUITETURA.md) para entender cada arquivo, os fluxos, os formatos da API e as bibliotecas.
+
+## Executar a versão completa em sala
 
 Requisitos: Node.js 20+, Python 3.9+ com o módulo padrão `sqlite3` e navegador atualizado. O projeto roda sem instalar pacotes e sem internet após clonar. Se o executável do Python tiver outro nome, configure a variável `PYTHON` antes de iniciar.
 
@@ -46,7 +52,7 @@ O trabalho segue a Aprendizagem Baseada em Problemas (PBL) do guia. A tabela rel
 | 1. Ecossistema e inovação | Mapear utilizador, emissor, instituição detentora e carteira, delimitar o cenário acadêmico e desenhar consentimento → autenticação → confirmação | Jornada na interface e roteiro de demonstração |
 | 2. Segurança e leis | Limitar finalidade, escopo e prazo, validar redirecionamento e permitir revogação. Separar saldo bancário e carteira | Rotas de autorização, consulta e revogação |
 | 3. Blockchain e DLTs | Modelar emissão, validações e entrega contra pagamento como regras de domínio antes da interface | `ledger.py` e testes de domínio |
-| 4. Integração | Integrar a jornada e o contrato simulado a uma API REST JSON consumida por JavaScript | `server.js`, `public/` e livro-razão na interface |
+| 4. Integração | Integrar a jornada e o contrato simulado a uma API REST JSON consumida por JavaScript | `server.js`, `docs/` e livro-razão na interface |
 
 ## Arquitetura e decisões
 

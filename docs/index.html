@@ -4,11 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>DREX Lab | Investimentos tokenizados</title>
-  <link rel="stylesheet" href="/styles.css">
-  <script type="module" src="/app.js"></script>
+  <link rel="stylesheet" href="./styles.css">
+  <script type="module" src="./app.js"></script>
 </head>
 <body>
-<header><div class="wrap bar"><a class="brand" href="/">DREX<span>Lab</span></a><span class="environment">Ambiente acadêmico</span></div></header>
+<header><div class="wrap bar"><a class="brand" href="./">DREX<span>Lab</span></a><span class="environment" id="environment">Ambiente acadêmico</span></div></header>
 <main class="wrap">
   <section class="hero">
     <p class="eyebrow">Carteira digital</p>
@@ -20,6 +20,7 @@
     </div>
   </section>
   <p id="feedback" role="status" hidden></p>
+  <!-- Agrupa os fluxos de compra e consentimento. -->
   <div class="grid">
     <section class="card">
       <p class="eyebrow">Mercado</p>
@@ -46,6 +47,7 @@
       <p id="bankData" aria-live="polite" hidden></p>
     </section>
   </div>
+  <!-- Mostra os blocos e a integridade das réplicas. -->
   <section class="card ledger">
     <p class="eyebrow">Auditoria</p>
     <h2>Livro-razão</h2>

@@ -16,6 +16,7 @@ class PurchaseError(Exception):
     pass
 
 
+# Ordena as chaves para obter o mesmo hash ao reler um bloco.
 def serialize(value):
     return json.dumps(value, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
 
@@ -29,6 +30,7 @@ def read_chain(db, node):
     return [json.loads(row[0]) for row in rows]
 
 
+# Adiciona o bloco encadeado às três réplicas.
 def append(db, chain, transaction):
     block = {
         "height": len(chain),
@@ -44,6 +46,7 @@ def append(db, chain, transaction):
     return block
 
 
+# Calcula carteira e estoque a partir das compras registradas.
 def account(chain, owner):
     purchases = [block for block in chain if block["event"] == "LIQUIDAÇÃO"]
     mine = [block for block in purchases if block["owner"] == owner]
@@ -55,6 +58,7 @@ def account(chain, owner):
     }
 
 
+# Valida saldo, estoque e repetição antes de liquidar.
 def purchase(db, chain, owner, units, operation_id):
     if type(units) is not int or units < 1:
         raise PurchaseError("Quantidade inválida ou estoque insuficiente.")
@@ -77,6 +81,7 @@ def purchase(db, chain, owner, units, operation_id):
     })
 
 
+# Confere o hash de cada bloco e a ligação com o anterior.
 def valid_chain(chain):
     previous = GENESIS
     for height, block in enumerate(chain):
@@ -120,6 +125,7 @@ def main():
     db = sqlite3.connect(path, timeout=5)
     try:
         with db:
+            # Reserva a escrita antes de consultar saldo e estoque.
             db.execute("BEGIN IMMEDIATE" if action in ("initialize", "purchase") else "BEGIN")
             result = run(db, action, json.loads(payload))
         print(serialize({"data": result}))

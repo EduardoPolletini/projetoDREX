@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Banco Horizonte | Autenticação simulada</title>
-  <link rel="stylesheet" href="/styles.css">
-  <script type="module" src="/bank.js"></script>
+  <link rel="stylesheet" href="./styles.css">
+  <script type="module" src="./bank.js"></script>
 </head>
 <body>
 <header><div class="wrap bar"><span class="brand">Banco Horizonte</span><span class="environment">Instituição simulada</span></div></header>
@@ -15,12 +15,13 @@
     <h1>Valide sua identidade</h1>
     <p>Após a validação, você voltará ao DREX Lab para confirmar o compartilhamento do saldo.</p>
     <p>Código da demonstração <strong>246810</strong></p>
+    <!-- Recebe apenas o PIN fictício da demonstração. -->
     <form id="bankForm">
       <label for="pin">Código de demonstração</label>
       <div class="actions"><input id="pin" type="password" inputmode="numeric" minlength="6" maxlength="6" required autocomplete="off"><button>Autenticar</button></div>
     </form>
     <p id="bankError" role="status" hidden></p>
-    <p><a href="/">Voltar ao DREX Lab</a></p>
+    <p><a href="./">Voltar ao DREX Lab</a></p>
   </section>
 </main>
 </body>

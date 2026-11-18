@@ -1,3 +1,4 @@
+/* Define cores, fontes e largura da interface. */
 :root { color-scheme: light; font-family: system-ui, sans-serif; color: #162923; background: #f2f6f3; }
 * { box-sizing: border-box; }
 body { margin: 0; }
@@ -21,6 +22,7 @@ p { line-height: 1.5; }
 .metrics div { display: grid; gap: 4px; min-width: 150px; border-top: 1px solid #ffffff59; padding-top: 10px; }
 .metrics span { color: #d1e7dc; font-size: .87rem; }
 .metrics strong { font-size: 1.8rem; }
+/* Organiza compra e consentimento em duas colunas. */
 .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 18px; }
 .card { min-width: 0; background: #fff; border: 1px solid #dbe6df; border-radius: 18px; padding: clamp(19px, 3vw, 30px); }
 .card p:not(.eyebrow) { color: #435b50; }
@@ -39,6 +41,7 @@ button.secondary { background: #fff; color: #126046; }
 button.secondary:hover { background: #e7f4ed; }
 :focus-visible { outline: 3px solid #167e5a; outline-offset: 3px; }
 .ledger { margin-top: 18px; }
+/* Permite rolagem horizontal do livro-razão em telas estreitas. */
 .table-wrap { overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; text-align: left; font-size: .88rem; }
 td, th { padding: 10px 8px; border-bottom: 1px solid #dbe6df; }
@@ -50,4 +53,5 @@ summary { cursor: pointer; font-family: monospace; }
 .bank { max-width: 640px; }
 footer { padding-bottom: 24px; color: #435b50; font-size: .85rem; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+/* Empilha os cartões em telas móveis. */
 @media (max-width: 680px) { .grid { grid-template-columns: 1fr; } }

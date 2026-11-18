@@ -5,6 +5,7 @@ import { join } from 'node:path';
 import { test } from 'node:test';
 import { Ledger } from './ledger.js';
 
+// Usa um banco temporário por teste.
 async function openLedger(context) {
   const directory = await mkdtemp(join(tmpdir(), 'drex-test-'));
   context.after(() => rm(directory, { recursive: true, force: true }));
