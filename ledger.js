@@ -1,63 +1,40 @@
-import { createHash } from 'node:crypto';
+import { execFile } from 'node:child_process';
+import { mkdir } from 'node:fs/promises';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { promisify } from 'node:util';
 
-export const unitPrice = 1250;
-const digest = (value) => createHash('sha256').update(JSON.stringify(value)).digest('hex');
+const run = promisify(execFile);
+const script = fileURLToPath(new URL('./ledger.py', import.meta.url));
 
 export class Ledger {
-  #nodes = [[], [], []];
-
-  constructor() {
-    this.#append({ event: 'EMISSÃO', units: 100, owner: 'EMISSOR-DEMO' });
+  constructor(path = process.env.DREX_DB || 'data/drex.sqlite3') {
+    this.path = resolve(path);
   }
 
-  #append(transaction) {
-    const chain = this.#nodes[0];
-    const block = {
-      height: chain.length,
-      previous: chain.at(-1)?.hash ?? '0'.repeat(64),
-      timestamp: new Date().toISOString(),
-      ...transaction,
-    };
-    block.hash = digest(block);
-    for (const node of this.#nodes) node.push(structuredClone(block));
-    return structuredClone(block);
+  async #execute(action, args = {}) {
+    const { stdout } = await run(process.env.PYTHON || 'python3', [
+      script, this.path, action, JSON.stringify(args),
+    ], { timeout: 10000 });
+    const result = JSON.parse(stdout);
+    if (result.error) throw Object.assign(new Error(result.error), { status: 409 });
+    return result.data;
+  }
+
+  async initialize() {
+    await mkdir(dirname(this.path), { recursive: true });
+    await this.#execute('initialize');
   }
 
   account(owner) {
-    const purchases = this.#nodes[0].filter((block) => block.event === 'LIQUIDAÇÃO');
-    const mine = purchases.filter((block) => block.owner === owner);
-    return {
-      balance: 25000 - mine.reduce((total, block) => total + block.amount, 0),
-      units: mine.reduce((total, block) => total + block.units, 0),
-      available: 100 - purchases.reduce((total, block) => total + block.units, 0),
-      unitPrice,
-    };
+    return this.#execute('account', { owner });
   }
 
   purchase(owner, units, operationId) {
-    const previous = this.#nodes[0].find((block) => block.owner === owner && block.operationId === operationId);
-    if (previous) {
-      if (previous.units !== units) throw new Error('Identificador já usado para outra quantidade.');
-      return structuredClone(previous);
-    }
-    const account = this.account(owner);
-    if (!Number.isSafeInteger(units) || units < 1 || units > account.available) {
-      throw new Error('Quantidade inválida ou estoque insuficiente.');
-    }
-    const amount = units * unitPrice;
-    if (amount > account.balance) throw new Error('Saldo DREX insuficiente.');
-    // Um evento representa as duas pernas da liquidação.
-    return this.#append({ event: 'LIQUIDAÇÃO', owner, units, amount, operationId });
+    return this.#execute('purchase', { owner, units: units ?? null, operationId });
   }
 
   audit() {
-    const reference = digest(this.#nodes[0]);
-    const replicas = this.#nodes.map((chain, index) => ({
-      node: index + 1,
-      height: chain.length,
-      valid: digest(chain) === reference && chain.every(({ hash, ...block }, position) =>
-        hash === digest(block) && block.previous === (chain[position - 1]?.hash ?? '0'.repeat(64))),
-    }));
-    return { replicas, blocks: structuredClone(this.#nodes[0]) };
+    return this.#execute('audit');
   }
 }

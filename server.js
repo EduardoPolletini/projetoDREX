@@ -1,16 +1,25 @@
 import { createServer as http } from 'node:http';
 import { createServer as https } from 'node:https';
-import { readFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { createCipheriv, createDecipheriv, createHmac, randomBytes, randomUUID, timingSafeEqual } from 'node:crypto';
 import { Ledger } from './ledger.js';
 
-const secret = randomBytes(32);
+const ledger = new Ledger();
+await ledger.initialize();
+
+const keyPath = ledger.path + '.key';
+try {
+  writeFileSync(keyPath, randomBytes(32), { flag: 'wx', mode: 0o600 });
+} catch (error) {
+  if (error.code !== 'EEXIST') throw error;
+}
+const secret = readFileSync(keyPath);
+if (secret.length !== 32) throw new Error('Chave JWT local inválida.');
 const dataKey = randomBytes(32);
 const iv = randomBytes(12);
 const cipher = createCipheriv('aes-256-gcm', dataKey, iv);
 const bankData = Buffer.concat([cipher.update(JSON.stringify({ institution: 'Banco Horizonte (simulado)', balance: 50000 }), 'utf8'), cipher.final()]);
 const tag = cipher.getAuthTag();
-const ledger = new Ledger();
 const sessions = new Map();
 const files = new Map([
   ['/', ['index.html', 'text/html; charset=utf-8']],
@@ -41,9 +50,13 @@ function authenticate(request) {
   const given = Buffer.from(signature);
   if (expected.length !== given.length || !timingSafeEqual(expected, given)) throw failure(401, 'Sessão inválida.');
   const claims = JSON.parse(Buffer.from(payload, 'base64url'));
-  const session = sessions.get(claims.sub);
-  if (!session || claims.exp <= Date.now() / 1000 || claims.iss !== 'drex-lab' || claims.aud !== 'drex-api') {
+  if (claims.exp <= Date.now() / 1000 || claims.iss !== 'drex-lab' || claims.aud !== 'drex-api') {
     throw failure(401, 'Sessão expirada. Inicie uma nova demonstração.');
+  }
+  let session = sessions.get(claims.sub);
+  if (!session) {
+    session = { exp: claims.exp, consent: null };
+    sessions.set(claims.sub, session);
   }
   return { owner: claims.sub, session };
 }
@@ -101,7 +114,7 @@ async function handle(request, response) {
     const data = request.method === 'POST' ? await body(request) : {};
     switch (route) {
       case 'GET /api/account':
-        return reply(response, 200, { ...ledger.account(owner), consent: consentView(session.consent) });
+        return reply(response, 200, { ...await ledger.account(owner), consent: consentView(session.consent) });
       case 'POST /api/consent': {
         if (![5, 15, 30].includes(data.minutes)) throw failure(400, 'Escolha um prazo disponível.');
         session.consent = { status: 'SOLICITADO', expiresAt: Date.now() + data.minutes * 60000, state: randomUUID() };
@@ -135,13 +148,11 @@ async function handle(request, response) {
       }
       case 'POST /api/purchases': {
         if (typeof data.operationId !== 'string' || !/^[a-z0-9-]{36}$/i.test(data.operationId)) throw failure(400, 'Identificador de operação inválido.');
-        let transaction;
-        try { transaction = ledger.purchase(owner, data.units, data.operationId); }
-        catch (error) { throw failure(409, error.message); }
+        const transaction = await ledger.purchase(owner, data.units, data.operationId);
         return reply(response, 200, transaction);
       }
       case 'GET /api/ledger': {
-        const { replicas, blocks } = ledger.audit();
+        const { replicas, blocks } = await ledger.audit();
         return reply(response, 200, {
           replicas,
           blocks: blocks.map(({ owner: holder, operationId, ...block }) => ({
