@@ -6,7 +6,7 @@ const money = (cents) => (cents / 100).toLocaleString('pt-BR', { style: 'currenc
 // Lê os parâmetros do retorno bancário e limpa a URL.
 const params = new URLSearchParams(location.search);
 let callback = params.has('state') && params.has('code') ? Object.fromEntries(params) : null;
-if (location.search) history.replaceState(null, '', location.pathname);
+if (location.search) history.replaceState(null, '', location.pathname + (callback ? '#open-finance' : location.hash));
 let account;
 if (isPages) byId('environment').textContent = 'Demonstração no navegador';
 else {
@@ -19,6 +19,28 @@ function notice(message, error = false) {
   byId('feedback').dataset.error = error;
   byId('feedback').hidden = !message;
 }
+
+// Exibe a tela correspondente ao link e mantém o histórico do navegador.
+const screens = [...document.querySelectorAll('.screen')];
+function showScreen(moveFocus = false) {
+  const hash = location.hash.slice(1);
+  const target = byId(hash);
+  const screen = target?.closest('.screen') ?? byId('open-finance');
+  const changed = screen.hidden;
+  for (const item of screens) item.hidden = item !== screen;
+  for (const link of document.querySelectorAll('[data-nav]')) {
+    if (link.dataset.nav === screen.id) link.setAttribute('aria-current', 'page');
+    else link.removeAttribute('aria-current');
+  }
+  if (moveFocus && changed) {
+    notice('');
+    screen.querySelector('h1').focus({ preventScroll: true });
+  }
+  if (hash && !target?.hidden) target?.scrollIntoView();
+  else if (moveFocus && changed) window.scrollTo(0, 0);
+}
+showScreen();
+window.addEventListener('hashchange', () => showScreen(true));
 
 // Atualiza os botões e limpa o saldo compartilhado quando o acesso termina.
 function showConsent() {

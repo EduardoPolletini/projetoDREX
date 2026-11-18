@@ -24,10 +24,10 @@ Execute o comando na raiz do projeto e abra **http://127.0.0.1:3000**. Em caso d
 
 ### Roteiro de apresentação
 
-1. Mostre o saldo inicial da carteira (R$ 250,00), as 100 frações disponíveis e o bloco de emissão.
-2. Escolha o prazo em **Conexão bancária** e clique em **Autorizar e ir ao banco**. Na tela do Banco Horizonte, valide com o código fictício **246810**.
+1. Abra a tela inicial de **Open Finance** e mostre as etapas da conexão bancária.
+2. Escolha o prazo e clique em **Autorizar e ir ao banco**. Na tela do Banco Horizonte, valide com o código fictício **246810**.
 3. De volta ao DREX Lab, clique em **Confirmar compartilhamento** e depois em **Consultar saldo**. O saldo bancário fictício de R$ 500,00 aparece. Revogue e mostre que a consulta fica indisponível.
-4. Compre duas frações. Mostre o débito de R$ 25,00 do saldo DREX, a carteira com duas frações e a queda do estoque para 98.
+4. Entre na **Carteira** e mostre o saldo inicial de R$ 250,00, as 100 frações disponíveis e o bloco de emissão. Compre duas frações e mostre o débito de R$ 25,00 e a queda do estoque para 98.
 5. Abra o hash do novo bloco. Compare o hash anterior com o bloco de emissão e confira a altura e a integridade das três réplicas.
 6. Na execução local, clique em **Ver detalhes da última tentativa** para mostrar o JSON enviado e o recorte do recibo. Abra os trechos de Node.js, Python e SQLite no **Modo apresentação**. Depois, tente comprar 19 frações para mostrar como a API retorna HTTP 409 por saldo insuficiente.
 
