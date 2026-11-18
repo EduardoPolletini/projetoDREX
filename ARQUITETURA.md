@@ -13,7 +13,7 @@ O MVP demonstra duas jornadas independentes. A primeira consulta um saldo bancá
 | Auditoria | Três cadeias lógicas em um arquivo SQLite | Três cópias no estado da aba |
 | Segurança | JWT assinado, verificação no servidor, saldo bancário sintético cifrado em memória e HTTPS opcional | HTTPS do Pages e controles simulados no próprio navegador |
 
-O GitHub Pages publica arquivos estáticos e não inicia processos Node.js ou Python. Por isso a versão online executa a simulação dentro do navegador. Os dados nessa versão podem ser modificados por quem controla o navegador. Use a versão local para demonstrar a API REST, a autenticação JWT, a integração entre linguagens e a persistência real.
+O GitHub Pages publica arquivos estáticos e não inicia processos Node.js ou Python. Por isso a versão online executa a simulação dentro do navegador. A publicação usa a raiz da branch `main` e o `index.html` da raiz encaminha para `docs/`. Os dados nessa versão podem ser modificados por quem controla o navegador. Use a versão local para demonstrar a API REST, a autenticação JWT, a integração entre linguagens e a persistência real.
 
 ```mermaid
 flowchart LR
@@ -37,7 +37,7 @@ flowchart LR
 | `docs/bank.js` | Envia PIN e `state` pelo adaptador, mostra erros e navega para a URL devolvida. | Isola o comportamento da tela da instituição. |
 | `docs/api.js` | Na raiz servida pelo Node.js, usa `fetch` para chamar `/api/`. No subcaminho do projeto no Pages, carrega `pages-api.js` por importação dinâmica. | As duas versões compartilham formulários e renderização. O caminho dos módulos distingue os ambientes nesta configuração. |
 | `docs/pages-api.js` | Simula as operações da API, serializa as ações da aba e usa Web Crypto para encadear e auditar blocos. | Mantém a demonstração utilizável no Pages sem infraestrutura adicional. |
-| `docs/.nojekyll` | Faz o Pages publicar a pasta como arquivos estáticos. | Dispensa processamento por Jekyll. |
+| `index.html` na raiz | Redireciona a URL principal do Pages para `docs/` e oferece um link direto. | Preserva o endereço público na configuração atual do Pages. |
 | `server.js` | Serve a interface, recebe HTTP ou HTTPS, valida JSON e JWT, controla consentimento e encaminha operações de carteira ao adaptador. | É o limite de confiança da versão completa e ponto único de entrada da API. |
 | `ledger.js` | Cria a pasta de dados e inicia `ledger.py` de forma assíncrona. Passa ação, caminho do banco e argumentos JSON e interpreta o JSON de resposta. | Mantém os detalhes de execução do Python fora das rotas REST. |
 | `ledger.py` | Inicializa o SQLite, calcula a carteira, valida compras, grava as réplicas e audita hashes. | Concentra as regras do contrato simulado e executa a escrita de forma atômica. |
