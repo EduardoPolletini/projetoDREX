@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DREX Lab | Investimentos tokenizados</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script type="module" src="/app.js"></script>
+</head>
+<body>
+<header><div class="wrap bar"><a class="brand" href="/">DREX<span>Lab</span></a><span class="environment">Ambiente acadêmico</span></div></header>
+<main class="wrap">
+  <section class="hero">
+    <p class="eyebrow">Carteira digital</p>
+    <h1>Investimentos tokenizados</h1>
+    <p>Compre frações de um ativo fictício com DREX simulado e acompanhe a liquidação no livro-razão.</p>
+    <div class="metrics">
+      <div><span>Saldo DREX</span><strong id="balance">—</strong></div>
+      <div><span>Frações na carteira</span><strong id="units">—</strong></div>
+    </div>
+  </section>
+  <p id="feedback" role="status" hidden></p>
+  <div class="grid">
+    <section class="card">
+      <p class="eyebrow">Mercado</p>
+      <h2>Recebível Solar</h2>
+      <p>Ativo fictício lastreado em receitas de geração solar no cenário da demonstração.</p>
+      <dl><div><dt>Preço por fração</dt><dd id="price">—</dd></div><div><dt>Frações disponíveis</dt><dd id="available">—</dd></div></dl>
+      <form id="purchase">
+        <label for="quantity">Quantidade de frações</label>
+        <div class="actions"><input id="quantity" type="number" min="1" max="100" step="1" value="1" required><button disabled>Liquidar compra</button></div>
+        <p id="total" class="small"></p>
+      </form>
+    </section>
+    <section class="card">
+      <p class="eyebrow">Open Finance</p>
+      <h2>Conexão bancária</h2>
+      <p>Autorize o DREX Lab a consultar somente o saldo fictício no Banco Horizonte para exibi-lo nesta tela.</p>
+      <p id="consentStatus" class="small" aria-live="polite"></p>
+      <form id="consent">
+        <label for="minutes">Prazo do consentimento</label>
+        <div class="actions"><select id="minutes"><option value="5">5 minutos</option><option value="15">15 minutos</option><option value="30">30 minutos</option></select><button disabled>Autorizar e ir ao banco</button></div>
+      </form>
+      <div class="actions" id="confirmActions" hidden><button id="confirm">Confirmar compartilhamento</button><button class="secondary" id="cancel">Cancelar</button></div>
+      <div class="actions" id="consentActions" hidden><button id="query">Consultar saldo</button><button class="secondary" id="revoke">Revogar acesso</button></div>
+      <p id="bankData" aria-live="polite" hidden></p>
+    </section>
+  </div>
+  <section class="card ledger">
+    <p class="eyebrow">Auditoria</p>
+    <h2>Livro-razão</h2>
+    <p id="replicas" aria-live="polite">Verificando réplicas…</p>
+    <div class="table-wrap"><table><caption class="sr-only">Blocos do livro-razão simulado</caption><thead><tr><th scope="col">Bloco</th><th scope="col">Evento</th><th scope="col">Titular</th><th scope="col">Frações</th><th scope="col">Valor</th><th scope="col">Hash</th></tr></thead><tbody id="blocks"></tbody></table></div>
+  </section>
+</main>
+<footer class="wrap">DREX Lab · Dados, ativos e operações fictícios</footer>
+</body>
+</html>
