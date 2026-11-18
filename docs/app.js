@@ -9,6 +9,10 @@ let callback = params.has('state') && params.has('code') ? Object.fromEntries(pa
 if (location.search) history.replaceState(null, '', location.pathname);
 let account;
 if (isPages) byId('environment').textContent = 'Demonstração no navegador';
+else {
+  byId('technicalLink').hidden = false;
+  byId('technical').hidden = false;
+}
 
 function notice(message, error = false) {
   byId('feedback').textContent = message;
@@ -52,8 +56,12 @@ async function refresh() {
   byId('units').textContent = account.units;
   byId('available').textContent = account.available;
   byId('price').textContent = money(account.unitPrice);
-  byId('replicas').textContent = ledger.replicas.map((replica) =>
-    'Nó ' + replica.node + ' · ' + (replica.valid ? 'íntegro' : 'divergente') + ' · ' + replica.height + ' bloco(s)').join('  |  ');
+  byId('replicas').replaceChildren(...ledger.replicas.map((replica) => {
+    const item = document.createElement('span');
+    item.dataset.valid = replica.valid;
+    item.textContent = 'Nó ' + replica.node + ' · ' + (replica.valid ? 'íntegro' : 'divergente') + ' · ' + replica.height + ' bloco(s)';
+    return item;
+  }));
   byId('blocks').replaceChildren(...ledger.blocks.toReversed().map((block) => {
     const row = document.createElement('tr');
     for (const value of [block.height, block.event, block.owner, block.units, block.amount ? money(block.amount) : '—']) {
@@ -85,12 +93,48 @@ function action(element, event, run) {
   });
 }
 
+// Mostra o retorno da última compra e omite identificadores internos e credenciais.
+function showTrace(request, { receipt, error } = {}) {
+  if (isPages) return;
+  const title = byId('traceTitle');
+  const summary = byId('traceSummary');
+  const response = byId('traceResponse');
+  byId('traceRequest').textContent = JSON.stringify(request, null, 2);
+  byId('traceLink').hidden = false;
+  byId('traceData').hidden = false;
+  summary.hidden = !receipt;
+
+  if (receipt) {
+    const { height, event, units, amount, previous, hash } = receipt;
+    title.textContent = 'Liquidação confirmada · Bloco ' + height;
+    summary.textContent = money(amount) + ' debitados da carteira DREX · ' + units + ' fração(ões) transferida(s).';
+    byId('traceResponseTitle').textContent = 'HTTP 200 · Recorte do recibo';
+    response.textContent = JSON.stringify({ height, event, units, amount, previous, hash }, null, 2);
+  } else if (error) {
+    title.textContent = error.status === 409 ? 'Compra recusada' : 'Compra sem confirmação';
+    byId('traceResponseTitle').textContent = error.status ? 'HTTP ' + error.status : 'Falha na comunicação';
+    response.textContent = JSON.stringify({ error: error.message }, null, 2);
+  } else {
+    title.textContent = 'Enviando compra…';
+    byId('traceResponseTitle').textContent = 'Retorno';
+    response.textContent = 'Aguardando resposta da API.';
+  }
+}
+
 // Reutiliza o identificador ao repetir uma tentativa de compra.
 let purchaseAttempt;
 action(byId('purchase'), 'submit', async () => {
   const units = Number(byId('quantity').value);
   if (purchaseAttempt?.units !== units) purchaseAttempt = { units, operationId: crypto.randomUUID() };
-  const receipt = await api('purchases', 'POST', purchaseAttempt);
+  showTrace(purchaseAttempt);
+  let receipt;
+  try {
+    receipt = await api('purchases', 'POST', purchaseAttempt);
+  } catch (error) {
+    showTrace(purchaseAttempt, { error });
+    throw error;
+  }
+  showTrace(purchaseAttempt, { receipt });
   purchaseAttempt = undefined;
   notice('Compra liquidada no bloco ' + receipt.height + '.');
   await refresh();

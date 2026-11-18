@@ -28,7 +28,8 @@ Execute o comando na raiz do projeto e abra **http://127.0.0.1:3000**. Em caso d
 2. Escolha o prazo em **Conexão bancária** e clique em **Autorizar e ir ao banco**. Na tela do Banco Horizonte, valide com o código fictício **246810**.
 3. De volta ao DREX Lab, clique em **Confirmar compartilhamento** e depois em **Consultar saldo**. O saldo bancário fictício de R$ 500,00 aparece. Revogue e mostre que a consulta fica indisponível.
 4. Compre duas frações. Mostre o débito de R$ 25,00 do saldo DREX, a carteira com duas frações e a queda do estoque para 98.
-5. Abra o hash do novo bloco. Compare o hash anterior com o bloco de emissão e confira a altura e a integridade das três réplicas. Tente comprar 19 frações após a compra de duas para demonstrar a recusa por saldo insuficiente.
+5. Abra o hash do novo bloco. Compare o hash anterior com o bloco de emissão e confira a altura e a integridade das três réplicas.
+6. Na execução local, clique em **Ver detalhes da última tentativa** para mostrar o JSON enviado e o recorte do recibo. Abra os trechos de Node.js, Python e SQLite no **Modo apresentação**. Depois, tente comprar 19 frações para mostrar como a API retorna HTTP 409 por saldo insuficiente.
 
 O saldo bancário é consultivo e pertence ao cenário de Open Finance. A carteira DREX tem saldo de demonstração próprio. O SQLite mantém o estoque, a titularidade e o livro-razão após reiniciar o servidor. Na mesma aba, um JWT ainda válido mantém a carteira. O consentimento é descartado ao reiniciar. Para ensaiar com um estado novo, inicie com um caminho de banco ainda não utilizado, por exemplo `DREX_DB=data/ensaio.sqlite3 npm start` em Bash.
 

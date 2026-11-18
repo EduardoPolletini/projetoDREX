@@ -8,10 +8,16 @@
   <script type="module" src="./app.js"></script>
 </head>
 <body>
-<header><div class="wrap bar"><a class="brand" href="./">DREX<span>Lab</span></a><span class="environment" id="environment">Ambiente acadêmico</span></div></header>
+<header>
+  <div class="wrap bar">
+    <a class="brand" href="./"><i class="brand-mark" aria-hidden="true"></i>DREX<span>Lab</span></a>
+    <nav aria-label="Seções"><a href="#operations">Operações</a><a href="#ledger">Livro-razão</a><a href="#technical" id="technicalLink" hidden>Modo apresentação</a></nav>
+    <span class="environment" id="environment">Execução local</span>
+  </div>
+</header>
 <main class="wrap">
   <section class="hero">
-    <p class="eyebrow">Carteira digital</p>
+    <p class="eyebrow">Carteira digital · Ambiente acadêmico</p>
     <h1>Investimentos tokenizados</h1>
     <p>Compre frações de um ativo fictício com DREX simulado e acompanhe a liquidação no livro-razão.</p>
     <div class="metrics">
@@ -21,8 +27,8 @@
   </section>
   <p id="feedback" role="status" hidden></p>
   <!-- Agrupa os fluxos de compra e consentimento. -->
-  <div class="grid">
-    <section class="card">
+  <div class="grid" id="operations">
+    <section class="card market">
       <p class="eyebrow">Mercado</p>
       <h2>Recebível Solar</h2>
       <p>Ativo fictício lastreado em receitas de geração solar no cenário da demonstração.</p>
@@ -31,9 +37,10 @@
         <label for="quantity">Quantidade de frações</label>
         <div class="actions"><input id="quantity" type="number" min="1" max="100" step="1" value="1" required><button disabled>Liquidar compra</button></div>
         <p id="total" class="small"></p>
+        <a class="small" id="traceLink" href="#technical" hidden>Ver detalhes da última tentativa</a>
       </form>
     </section>
-    <section class="card">
+    <section class="card connection">
       <p class="eyebrow">Open Finance</p>
       <h2>Conexão bancária</h2>
       <p>Autorize o DREX Lab a consultar somente o saldo fictício no Banco Horizonte para exibi-lo nesta tela.</p>
@@ -48,11 +55,38 @@
     </section>
   </div>
   <!-- Mostra os blocos e a integridade das réplicas. -->
-  <section class="card ledger">
+  <section class="card ledger" id="ledger">
     <p class="eyebrow">Auditoria</p>
     <h2>Livro-razão</h2>
     <p id="replicas" aria-live="polite">Verificando réplicas…</p>
     <div class="table-wrap"><table><caption class="sr-only">Blocos do livro-razão simulado</caption><thead><tr><th scope="col">Bloco</th><th scope="col">Evento</th><th scope="col">Titular</th><th scope="col">Frações</th><th scope="col">Valor</th><th scope="col">Hash</th></tr></thead><tbody id="blocks"></tbody></table></div>
+  </section>
+  <section class="card technical" id="technical" aria-labelledby="technicalTitle" hidden>
+    <p class="eyebrow">Modo apresentação</p>
+    <h2 id="technicalTitle">Por dentro da liquidação</h2>
+    <p>Faça uma compra em Operações para acompanhar o retorno da API e o registro no livro-razão.</p>
+    <ol class="flow" aria-label="Etapas da compra">
+      <li><strong>01 / Navegador</strong><span>Envia a quantidade e o ID da operação.</span></li>
+      <li><strong>02 / Node.js</strong><span>Valida o JWT e chama o domínio.</span></li>
+      <li><strong>03 / Python</strong><span>Calcula o valor e valida saldo e estoque.</span></li>
+      <li><strong>04 / SQLite</strong><span>Grava as três réplicas em uma transação.</span></li>
+    </ol>
+    <div class="trace" aria-label="Última tentativa de compra">
+      <h3 id="traceTitle" role="status">Aguardando uma compra</h3>
+      <p id="traceSummary" hidden></p>
+      <div class="trace-data" id="traceData" hidden>
+        <div><h4>POST /api/purchases</h4><pre><code id="traceRequest"></code></pre></div>
+        <div><h4 id="traceResponseTitle">Retorno</h4><pre><code id="traceResponse"></code></pre></div>
+      </div>
+    </div>
+    <div class="samples">
+      <details><summary>Node.js · Encaminha ao domínio</summary><pre><code>const transaction = await ledger.purchase(owner, data.units, data.operationId);
+return reply(response, 200, transaction);</code></pre></details>
+      <details><summary>Python · Valida o saldo em centavos</summary><pre><code>amount = units * UNIT_PRICE
+if amount &gt; wallet["balance"]:
+    raise PurchaseError("Saldo DREX insuficiente.")</code></pre></details>
+      <details><summary>SQLite · Reserva a escrita antes da validação</summary><pre><code>db.execute("BEGIN IMMEDIATE" if action in ("initialize", "purchase") else "BEGIN")</code></pre></details>
+    </div>
   </section>
 </main>
 <footer class="wrap">DREX Lab · Dados, ativos e operações fictícios</footer>
