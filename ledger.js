@@ -14,7 +14,7 @@ export class Ledger {
 
   // Executa o Python sem bloquear o servidor e lê a resposta JSON.
   async #execute(action, args = {}) {
-    const { stdout } = await run(process.env.PYTHON || 'python3', [
+    const { stdout } = await run(process.env.PYTHON || 'python', [
       script, this.path, action, JSON.stringify(args),
     ], { timeout: 10000 });
     const result = JSON.parse(stdout);
