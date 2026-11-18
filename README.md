@@ -9,12 +9,10 @@ MVP acadêmico de Engenharia da Computação sobre **DREX e tokenização de ati
 Requisitos: Node.js 20 ou superior e navegador atualizado. O projeto não usa dependências externas nem internet durante a execução.
 
 ```sh
-git clone https://github.com/EduardoPolletini/drex-lab.git
-cd drex-lab
 npm start
 ```
 
-Abra **http://127.0.0.1:3000**. O repositório é privado e o clone exige uma conta com acesso. Em caso de porta ocupada, use `PORT=3001 npm start` em Bash e abra a nova porta. Execute `npm test` para verificar as regras de domínio.
+Execute o comando na raiz do projeto e abra **http://127.0.0.1:3000**. Em caso de porta ocupada, use `PORT=3001 npm start` em Bash e abra a nova porta. Execute `npm test` para verificar as regras de domínio.
 
 ### Roteiro de apresentação
 
